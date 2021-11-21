@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"log"
+	"os"
 )
 
 func CreateUUID() (uuid string) {
@@ -23,7 +24,18 @@ func CreateUUID() (uuid string) {
 	return
 }
 
-func Encrypt(plaintext string) (cryptext string) {
-	cryptext = fmt.Sprintf("%x", sha1.Sum([]byte(plaintext)))
+func Encrypt(plaintext string) (crypText string) {
+	crypText = fmt.Sprintf("%x", sha1.Sum([]byte(plaintext)))
 	return
+}
+
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
