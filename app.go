@@ -5,9 +5,11 @@ import (
 	"GoGallery/database"
 	"GoGallery/handlers"
 	"GoGallery/model"
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"runtime"
 	// "github.com/gin-contrib/cors"
 )
 
@@ -35,15 +37,21 @@ func main() {
 	model.InitAlbumSqlStruct()
 
 	r := gin.Default()
+	fmt.Printf("%T %+v\n", config.Conf.AllowOrigins, config.Conf.AllowOrigins)
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost"},
+		AllowOrigins:     config.Conf.AllowOrigins,
 		AllowMethods:     []string{http.MethodGet, http.MethodPatch, http.MethodPost, http.MethodHead, http.MethodDelete, http.MethodOptions},
 		AllowHeaders:     []string{"Content-Type", "X-XSRF-TOKEN", "Accept", "Origin", "X-Requested-With", "Authorization", "X-Token"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
 	r.Use(AuthMiddleWare())
-	r.Static("/photos", "F:\\albums\\")
+
+	if sysType := runtime.GOOS; sysType == "linux" {
+		r.Static("/photos", config.Conf.AlbumStorePathOnLinux)
+	} else if sysType == "windows" {
+		r.Static("/photos", config.Conf.AlbumStorePathOnWin)
+	}
 	r.MaxMultipartMemory = 20 << 20
 
 	r.POST("/user/login", handlers.UserLogIn)

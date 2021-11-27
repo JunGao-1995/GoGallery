@@ -2,7 +2,8 @@ package model
 
 import (
 	"GoGallery/database"
-	"gorm.io/gorm"
+	_ "gorm.io/gorm"
+	"gorm.io/plugin/soft_delete"
 	"log"
 	"os"
 	"path/filepath"
@@ -18,7 +19,7 @@ type Album struct {
 	ID        uint `gorm:"primaryKey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index;uniqueIndex:udx_name"`
+	DeletedAt soft_delete.DeletedAt `gorm:"index;uniqueIndex:udx_name"`
 	UserId    uint
 	Name      string `json:"name" form:"name" gorm:"not null;uniqueIndex:udx_name;size:128"`
 	Path      string `gorm:"not null"`
@@ -28,7 +29,7 @@ type Photo struct {
 	ID        uint `gorm:"primaryKey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index;uniqueIndex:udx_name"`
+	DeletedAt soft_delete.DeletedAt `gorm:"index;uniqueIndex:udx_name"`
 	AlbumId   uint
 	Name      string `gorm:"not null;uniqueIndex:udx_name;size:128" json:"photo_name"`
 	Link      string `json:"url" gorm:"not null"`
@@ -70,6 +71,9 @@ func (album *Album) GetPhotoInfo() ([]*Photo, error) {
 }
 
 func (album *Album) RemoveAlbum() error {
+	var photos []*Photo
+	database.Mysql.Where("album_id = ?", album.ID).Find(&photos)
+	database.Mysql.Delete(photos)
 	database.Mysql.Delete(&album)
 	os.RemoveAll(album.Path)
 	return nil

@@ -14,7 +14,10 @@ type Config struct {
 
 type (
 	App struct {
-		Addr string `ini:"addr"`
+		Addr                  string   `ini:"addr"`
+		AllowOrigins          []string `ini:"allow_origins"`
+		AlbumStorePathOnLinux string   `ini:"album_store_path_on_linux"`
+		AlbumStorePathOnWin   string   `ini:"album_store_path_on_win"`
 	}
 
 	Mysql struct {
@@ -39,5 +42,6 @@ func NewConfig(env string) {
 		c := new(Config)
 		err = cfg.MapTo(c)
 		Conf = c
+		fmt.Printf("Config: %+v\n", c)
 	})
 }

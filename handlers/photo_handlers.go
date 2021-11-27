@@ -71,6 +71,7 @@ func GetPhotoList(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, nil)
 			return
 		} else {
+			log.Printf("Query photo list: %+v\n", photos)
 			c.JSON(http.StatusOK, gin.H{
 				"data": photos,
 			})
